@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CustomerTable from "./components/CustomerTable";
 import TransactionGraph from "./components/TransactionGraph";
+import localData from "../db.json";
 
 const App = () => {
   const [customers, setCustomers] = useState([]);
@@ -11,15 +12,19 @@ const App = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const Result = await axios("https://hussein-elmlah.github.io/customer-transactions-data/db.json");
+        const result = await axios("https://hussein-elmlah.github.io/customer-transactions-data/db.json");
 
-        const customersResult = Result.data.customers;
-        const transactionsResult = Result.data.transactions;
+        const customersResult = result.data.customers;
+        const transactionsResult = result.data.transactions;
 
         setCustomers(customersResult);
         setTransactions(transactionsResult);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching data from server, using local data:", error);
+        
+        // Fallback to local data if fetching from server fails
+        setCustomers(localData.customers);
+        setTransactions(localData.transactions);
       }
     };
 
