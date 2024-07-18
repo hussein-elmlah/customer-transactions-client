@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import CustomerTable from './components/CustomerTable.jsx';
+import TransactionGraph from './components/TransactionGraph.jsx';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [customers, setCustomers] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [filter, setFilter] = useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const customersResult = await axios('http://localhost:5000/customers');
+        const transactionsResult = await axios('http://localhost:5000/transactions');
+
+        // console.log('Fetched customers:', customersResult.data);
+        // console.log('Fetched transactions:', transactionsResult.data);
+
+        setCustomers(customersResult.data);
+        setTransactions(transactionsResult.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <input
+        type="text"
+        placeholder="Filter by customer name or transaction amount"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
+      <CustomerTable
+        customers={customers}
+        transactions={transactions}
+        filter={filter}
+        onCustomerSelect={(id) => setSelectedCustomerId(id)}
+      />
+      {selectedCustomerId && (
+        <TransactionGraph transactions={transactions} customerId={selectedCustomerId} />
+      )}
+    </div>
+  );
+};
 
-export default App
+export default App;
