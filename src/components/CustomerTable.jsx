@@ -1,38 +1,30 @@
 import React, { useEffect, useState } from 'react';
 
-const CustomerTable = ({ customers, transactions, filter, filterBy, onDisplayGraph }) => {
-  const [filteredCustomers, setFilteredCustomers] = useState([]);
+const CustomerTable = ({ customers, transactions, onDisplayGraph }) => {
+  const [searchKey, setSearchKey] = useState('');
+  const [filterByTransactionAmount, setFilterByTransactionAmount] = useState(false);
+  const [amountFilterMin, setAmountFilterMin] = useState(0); // Default to 0
+  const [amountFilterMax, setAmountFilterMax] = useState(Infinity); // Default to Infinity
   const [filteredTransactions, setFilteredTransactions] = useState([]);
 
-  // Filter customers and transactions when filter or filterBy changes
+  // Filter transactions when searchKey, filterByTransactionAmount, or amount filters change
   useEffect(() => {
-    console.log(" filterBy :", filterBy);
-    console.log(" filter :", filter);
-
-    const filteredCustomers = customers.filter((customer) =>{
-      if ( filterBy === 'name') {
-        return customer.name.toLowerCase().includes(filter.toLowerCase());
-      }
-      return true;
-    }
+    const filteredCustomers = customers.filter((customer) =>
+      customer.name.toLowerCase().includes(searchKey.toLowerCase())
     );
 
     const filteredTransactions = filteredCustomers.flatMap((customer) =>
       transactions
+        .filter((transaction) => transaction.customer_id == customer.id)
         .filter((transaction) => {
-          console.log(" inside filterBy :", filterBy);
-          console.log(" inside filter :", filter);
-          return transaction.customer_id == customer.id
+          if (filterByTransactionAmount) {
+            const amount = parseFloat(transaction.amount);
+            const min = parseFloat(amountFilterMin);
+            const max = parseFloat(amountFilterMax);
+            return amount >= min && amount <= max;
+          }
+          return true;
         })
-        .filter((transaction) => {
-          console.log ("transaction.amount.toString():", transaction.amount.toString());
-          console.log(" inside filter :", filter);
-          return ( filterBy === 'amount'
-            ? (transaction.amount === Number(filter))
-            : true
-          )
-        }
-        )
         .map((transaction) => ({
           customerName: customer.name,
           transactionDate: transaction.date,
@@ -41,26 +33,81 @@ const CustomerTable = ({ customers, transactions, filter, filterBy, onDisplayGra
         }))
     );
 
-    setFilteredCustomers(filteredCustomers);
     setFilteredTransactions(filteredTransactions);
-  }, [customers, transactions, filter, filterBy]);
+  }, [customers, transactions, searchKey, filterByTransactionAmount, amountFilterMin, amountFilterMax]);
 
-  console.log('Filtered Customers:', filteredCustomers);
-  console.log('Filtered Transactions:', filteredTransactions);
+  const handleMinAmountChange = (e) => {
+    setAmountFilterMin(parseFloat(e.target.value));
+  };
+
+  const handleMaxAmountChange = (e) => {
+    const maxValue = e.target.value === '' ? Infinity : parseFloat(e.target.value);
+    setAmountFilterMax(maxValue);
+  };
+
+  const clearAmountFilters = () => {
+    setAmountFilterMin(0); // Reset to default
+    setAmountFilterMax(Infinity); // Reset to default
+  };
+
+  const handleSearchKeyChange = (e) => {
+    setSearchKey(e.target.value);
+  };
+
+  const toggleFilterByTransactionAmount = () => {
+    setFilterByTransactionAmount(!filterByTransactionAmount);
+  };
 
   return (
     <div className="table-responsive">
       <div className="mb-3">
-        <label htmlFor="filterBy" className="form-label me-2">Filter by:</label>
-        <select
-          id="filterBy"
-          className="form-select"
-          value={filterBy}
-          onChange={(e) => onFilterChange(e.target.value)}
-        >
-          <option value="name">Customer Name</option>
-          <option value="amount">Transaction Amount</option>
-        </select>
+        <input
+          type="text"
+          className="form-control mb-3"
+          placeholder={`Search by customer name`}
+          value={searchKey}
+          onChange={handleSearchKeyChange}
+        />
+        <div className="form-check form-switch">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id="filterByAmount"
+            checked={filterByTransactionAmount}
+            onChange={toggleFilterByTransactionAmount}
+          />
+          <label className="form-check-label" htmlFor="filterByAmount">
+            Filter by Transaction Amount
+          </label>
+          {filterByTransactionAmount && (
+            <div className="d-flex mt-3">
+              <label htmlFor="amountFilterMin" className="me-2">Min Amount:</label>
+              <input
+                type="number"
+                className="form-control me-2"
+                id="amountFilterMin"
+                placeholder="Min Amount"
+                value={amountFilterMin}
+                onChange={handleMinAmountChange}
+              />
+              <label htmlFor="amountFilterMax" className="me-2">Max Amount:</label>
+              <input
+                type="number"
+                className="form-control me-2"
+                id="amountFilterMax"
+                placeholder="Infinity"
+                value={amountFilterMax === Infinity ? '' : amountFilterMax}
+                onChange={handleMaxAmountChange}
+              />
+              <button
+                className="btn btn-outline-secondary"
+                onClick={clearAmountFilters}
+              >
+                Clear
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       <table className="table table-striped table-bordered">
         <thead className="thead-dark">

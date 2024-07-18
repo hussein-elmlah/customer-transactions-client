@@ -6,9 +6,7 @@ import TransactionGraph from "./components/TransactionGraph";
 const App = () => {
   const [customers, setCustomers] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [filter, setFilter] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-  const [filterBy, setFilterBy] = useState('name'); // Default filter by customer name
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,38 +34,13 @@ const App = () => {
     setSelectedCustomerId(null);
   };
 
-  const onFilterChange = (selectedFilter) => {
-    setFilterBy(selectedFilter);
-  };
-
   return (
     <div className="container my-4">
       <div className="row">
         <div className="col-md-12">
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control mb-3"
-              placeholder={`Filter by ${filterBy === 'name' ? 'customer name' : 'transaction amount'}`}
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
-            <label htmlFor="filterBy" className="form-label me-2">Filter by:</label>
-            <select
-              id="filterBy"
-              className="form-select"
-              value={filterBy}
-              onChange={(e) => onFilterChange(e.target.value)}
-            >
-              <option value="name">Customer Name</option>
-              <option value="amount">Transaction Amount</option>
-            </select>
-          </div>
           <CustomerTable
             customers={customers}
             transactions={transactions}
-            filter={filter}
-            filterBy={filterBy}
             onDisplayGraph={handleDisplayGraph}
           />
         </div>
@@ -77,7 +50,11 @@ const App = () => {
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title pe-2">Customer Transactions Graph</h5>
-                  <button type="button" className="btn btn-danger close" onClick={closeModal}>
+                  <button
+                    type="button"
+                    className="btn btn-danger close"
+                    onClick={closeModal}
+                  >
                     <span>&times;</span>
                   </button>
                 </div>
