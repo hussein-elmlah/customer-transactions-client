@@ -11,13 +11,13 @@ const App = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const customersResult = await axios("http://localhost:5000/customers");
-        const transactionsResult = await axios(
-          "http://localhost:5000/transactions"
-        );
+        const Result = await axios("https://hussein-elmlah.github.io/customer-transactions-data/db.json");
 
-        setCustomers(customersResult.data);
-        setTransactions(transactionsResult.data);
+        const customersResult = Result.data.customers;
+        const transactionsResult = Result.data.transactions;
+
+        setCustomers(customersResult);
+        setTransactions(transactionsResult);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

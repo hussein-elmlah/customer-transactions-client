@@ -3,11 +3,10 @@ import React, { useEffect, useState } from 'react';
 const CustomerTable = ({ customers, transactions, onDisplayGraph }) => {
   const [searchKey, setSearchKey] = useState('');
   const [filterByTransactionAmount, setFilterByTransactionAmount] = useState(false);
-  const [amountFilterMin, setAmountFilterMin] = useState(0); // Default to 0
-  const [amountFilterMax, setAmountFilterMax] = useState(Infinity); // Default to Infinity
+  const [amountFilterMin, setAmountFilterMin] = useState(0);
+  const [amountFilterMax, setAmountFilterMax] = useState(Infinity);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
 
-  // Filter transactions when searchKey, filterByTransactionAmount, or amount filters change
   useEffect(() => {
     const filteredCustomers = customers.filter((customer) =>
       customer.name.toLowerCase().includes(searchKey.toLowerCase())
@@ -46,8 +45,8 @@ const CustomerTable = ({ customers, transactions, onDisplayGraph }) => {
   };
 
   const clearAmountFilters = () => {
-    setAmountFilterMin(0); // Reset to default
-    setAmountFilterMax(Infinity); // Reset to default
+    setAmountFilterMin(0);
+    setAmountFilterMax(Infinity);
   };
 
   const handleSearchKeyChange = (e) => {
